@@ -252,7 +252,7 @@ def get_parser():
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=128,
+        default=64,
         help="Batch size for training and validation",
     )
 
@@ -338,7 +338,7 @@ def get_parser():
     parser.add_argument(
         "--mel-recon-loss-scale",
         type=float,
-        default=15.0,
+        default=45.0,
         help="Mel-reconstruction loss scale.",
     )
 
@@ -411,6 +411,7 @@ def get_cond_module_and_gan(params: AttributeDict) -> nn.Module:
     """Create condition module and GAN model."""
     # would add sampling_rate to params
     cond_module, generator = get_cond_module_and_generator(params)
+    generator.branch_dropout = 0.0  # disable branch dropout for finetuning
 
     if params.generator_model_path is not None and params.start_epoch == 1:
         logging.info(f"Initialize generator model weights from {params.generator_model_path}")

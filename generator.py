@@ -191,9 +191,7 @@ class BaseAudioGenerator(nn.Module):
             # differences would be more audible; the choice of 0.5 for loss_power is arbitrary, it
             # could be anywhere between 0 (no correction for volume) and 1 (fully invariant to
             # local volume).
-            spec_lens = torch.div(
-                audio_lens, self.loss_spec.hop_length, rounding_mode="floor"
-            ) + 1
+            spec_lens = torch.div(audio_lens, self.loss_spec.hop_length, rounding_mode="floor") + 1
             assert err_spec.shape[2] == spec_lens.max().item()
             mask = make_pad_mask(spec_lens).logical_not().unsqueeze(1)
             spec_scale = ((gt_spec + self.loss_eps) ** -self.loss_power).clamp(min=self.loss_scale_min, max=self.loss_scale_max)
