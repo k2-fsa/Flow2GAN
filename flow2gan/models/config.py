@@ -16,10 +16,10 @@
 # limitations under the License.
 
 
-from utils import AttributeDict
+from flow2gan.utils import AttributeDict
 
 
-def get_generator_config(model_named: str) -> AttributeDict:
+def get_generator_config(model_named: str = "mel_24k_base") -> AttributeDict:
     if model_named == "mel_24k_base":
         return AttributeDict(mel_24k_base)
     else:
@@ -79,3 +79,10 @@ gan_single_scale_mel_recon = {
     "mel_recon_n_mels": (100),
 }
 
+
+HF_REPO = "k2-fsa/Flow2GAN"
+HF_MODEL_NAMES = {
+    "libritts-mel-1-step": 1,
+    "libritts-mel-2-step": 2,
+    "libritts-mel-4-step": 4,    
+}

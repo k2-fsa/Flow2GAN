@@ -33,7 +33,7 @@ import torchaudio
 from auraloss.freq import MultiResolutionSTFTLoss
 from pesq import pesq
 
-from utils import setup_logger, str2bool
+from flow2gan.utils import setup_logger, str2bool
 
 
 def visqol(

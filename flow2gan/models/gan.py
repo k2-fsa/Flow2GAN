@@ -23,8 +23,8 @@ import torch
 from torch import Tensor, nn
 from torchaudio.transforms import MelSpectrogram
 
-from discriminators import MultiPeriodDiscriminator, MultiResolutionDiscriminator
-from utils import safe_log
+from flow2gan.models.discriminators import MultiPeriodDiscriminator, MultiResolutionDiscriminator
+from flow2gan.utils import safe_log
 
 
 class GAN(nn.Module):

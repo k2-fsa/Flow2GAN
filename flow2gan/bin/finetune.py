@@ -34,18 +34,18 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim import Optimizer
 from torch.utils.tensorboard import SummaryWriter
 
-import diagnostics
-from checkpoint import load_checkpoint, save_checkpoint, update_averaged_model
-from config import get_gan_config
-from dataset import LhotseRecordingDataset, pad_seq_collate_fn
-from gan import GAN
-from dist import cleanup_dist, setup_dist
-from env import get_env_info
-from err import raise_grad_scale_is_too_small_error
-from hooks import register_inf_check_hooks
-from optim import Eden2, LRScheduler, ScaledAdam
-from pretrain import get_cond_module_and_generator, prepare_data_loaders
-from utils import (
+from flow2gan import diagnostics
+from flow2gan.bin.pretrain import get_cond_module_and_generator, prepare_data_loaders
+from flow2gan.checkpoint import load_checkpoint, save_checkpoint, update_averaged_model
+from flow2gan.dataset import LhotseRecordingDataset, pad_seq_collate_fn
+from flow2gan.dist import cleanup_dist, setup_dist
+from flow2gan.env import get_env_info
+from flow2gan.err import raise_grad_scale_is_too_small_error
+from flow2gan.hooks import register_inf_check_hooks
+from flow2gan.models.config import get_gan_config
+from flow2gan.models.gan import GAN
+from flow2gan.optim import Eden2, LRScheduler, ScaledAdam
+from flow2gan.utils import (
     AttributeDict, 
     MetricsTracker, 
     plot_feature, 

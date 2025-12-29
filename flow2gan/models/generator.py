@@ -23,8 +23,8 @@ from typing import List, Optional, Tuple
 import torch
 from torch import Tensor, nn
 
-from modules import AudioConvNeXt, CondEncoder, LinearFilterSpectrogram
-from utils import make_pad_mask
+from flow2gan.models.modules import AudioConvNeXt, CondEncoder, LinearFilterSpectrogram
+from flow2gan.utils import make_pad_mask
 
 
 class BaseAudioGenerator(nn.Module):
@@ -276,6 +276,7 @@ class MelAudioGenerator(BaseAudioGenerator):
     def __init__(
         self,
         n_mels: int = 100,
+        mel_n_fft: int = 1024,
         mel_hop_length: int = 256,
         max_add_noise_scale: float = 0.0,
         **kwargs,
@@ -285,6 +286,9 @@ class MelAudioGenerator(BaseAudioGenerator):
             cond_hop_length=mel_hop_length, 
             **kwargs,
         )
+        self.n_mels = n_mels
+        self.mel_n_fft = mel_n_fft
+        self.mel_hop_length = mel_hop_length
         self.max_add_noise_scale = max_add_noise_scale
 
     def forward(
@@ -345,8 +349,11 @@ class MelAudioGenerator(BaseAudioGenerator):
         else:
             cond = cond
         
-        audio_shape = (cond.shape[0], cond.shape[2] * self.mel_hop_length) 
-        noise = torch.randn(audio_shape, device=cond.device, dtype=cond.dtype) * self.init_noise_scale
+        if audio_lens is None:
+            length = cond.shape[2] * self.mel_hop_length
+        else:
+            length = audio_lens.max().item()
+        noise = torch.randn((cond.shape[0], length), device=cond.device, dtype=cond.dtype) * self.init_noise_scale
 
         pred_audio = super().infer(
             noise=noise,

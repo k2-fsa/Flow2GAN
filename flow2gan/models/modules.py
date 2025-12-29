@@ -25,7 +25,7 @@ from torch import Tensor, nn
 from torchaudio import functional as F
 from torchaudio.transforms import MelSpectrogram, Spectrogram
 
-from utils import convert_length, make_pad_mask, safe_log
+from flow2gan.utils import convert_length, make_pad_mask, safe_log
 
 
 def fft_to_real(fft: torch.Tensor):

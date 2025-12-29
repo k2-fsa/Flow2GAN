@@ -30,7 +30,7 @@ import torchaudio
 import torchcrepe
 from tqdm import tqdm
 
-from utils import setup_logger
+from flow2gan.utils import setup_logger
 
 
 # from https://github.com/descriptinc/cargan/blob/master/config/cargan.py

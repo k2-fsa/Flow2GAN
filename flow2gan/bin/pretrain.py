@@ -36,17 +36,17 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim import Optimizer
 from torch.utils.tensorboard import SummaryWriter
 
-import diagnostics
-from checkpoint import load_checkpoint, save_checkpoint, update_averaged_model
-from config import get_generator_config
-from dataset import LhotseRecordingDataset, build_data_loader, pad_seq_collate_fn
-from dist import cleanup_dist, setup_dist
-from env import get_env_info
-from err import raise_grad_scale_is_too_small_error
-from generator import MelAudioGenerator
-from hooks import register_inf_check_hooks
-from optim import Eden2, LRScheduler, ScaledAdam
-from utils import (
+from flow2gan import diagnostics
+from flow2gan.checkpoint import load_checkpoint, save_checkpoint, update_averaged_model
+from flow2gan.dataset import LhotseRecordingDataset, build_data_loader, pad_seq_collate_fn
+from flow2gan.dist import cleanup_dist, setup_dist
+from flow2gan.env import get_env_info
+from flow2gan.err import raise_grad_scale_is_too_small_error
+from flow2gan.hooks import register_inf_check_hooks
+from flow2gan.models.config import get_generator_config
+from flow2gan.models.generator import MelAudioGenerator
+from flow2gan.optim import Eden2, LRScheduler, ScaledAdam
+from flow2gan.utils import (
     AttributeDict, 
     MetricsTracker, 
     get_parameter_groups_with_lrs, 
@@ -321,7 +321,7 @@ def get_cond_module_and_generator(params: AttributeDict) -> Tuple[nn.Module, nn.
     params.sampling_rate = model_cfg.sampling_rate
 
     if "mel" in params.model_name:
-        from modules import LogMelSpectrogram
+        from flow2gan.models.modules import LogMelSpectrogram
         cond_module = LogMelSpectrogram(
             sampling_rate=model_cfg.sampling_rate,
             n_fft=model_cfg.mel_n_fft,
@@ -619,8 +619,6 @@ def save_test_samples(
     num_samples = audio.shape[0]
 
     save_infer_steps = to_int_tuple(params.save_infer_steps)
-    if not inner_model.use_t:
-        save_infer_steps = (1,)
         
     results = [
         {"gt": audio[i][:audio_lens[i].item()].numpy()}

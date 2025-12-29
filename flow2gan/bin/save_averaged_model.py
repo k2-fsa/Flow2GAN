@@ -18,14 +18,17 @@
 import argparse
 
 import torch
+import torch.nn as nn
 
-from checkpoint import (
+from flow2gan.bin.pretrain import get_cond_module_and_generator
+from flow2gan.checkpoint import (
     average_checkpoints,
     average_checkpoints_with_averaged_model,
     load_checkpoint,
 )
-from pretrain import get_cond_module_and_generator
-from utils import AttributeDict, str2bool
+from flow2gan.models.config import get_gan_config
+from flow2gan.models.gan import GAN
+from flow2gan.utils import AttributeDict, str2bool
 
 
 def get_parser():
@@ -76,7 +79,37 @@ def get_parser():
         `mel_24k_base`.""",
     )
 
+    parser.add_argument(
+        "--gan-name",
+        type=str,
+        default="gan_multi_scale_mel_recon",
+        help="""Name of the gan to use. Supported names are 
+        `gan_multi_scale_mel_recon`, `gan_single_scale_mel_recon`.""",
+    )
+
+    parser.add_argument(
+        "--load-gan",
+        type=str2bool,
+        default=False,
+        help="If true, load GAN model, and save only the generator; If false, load the generator model.",
+    )
+
     return parser
+
+
+def get_cond_module_and_model(params: AttributeDict) -> nn.Module:
+    """Create condition module and generator or GAN."""
+    # would add sampling_rate to params
+    cond_module, generator = get_cond_module_and_generator(params) 
+
+    if not params.load_gan:
+        return cond_module, generator
+
+    gan_cfg = get_gan_config(params.gan_name)
+    print(gan_cfg)
+    gan = GAN(generator=generator, **gan_cfg)
+
+    return cond_module, gan
 
 
 def main():
@@ -87,6 +120,8 @@ def main():
     params.suffix = f"epoch-{params.epoch}-avg-{params.avg}"
     if params.use_averaged_model:
         params.suffix += "-use-avg-model"
+    if params.load_gan:
+        params.suffix += "-only-gen"
 
     params.saved_model_path = f"{params.exp_dir}/{params.suffix}.pt"
 
@@ -96,10 +131,16 @@ def main():
     print(params)
 
     print("About to create model")
-    _, model = get_cond_module_and_generator(params)
+    _, model = get_cond_module_and_model(params)
 
-    num_param = sum([p.numel() for p in model.parameters()])
-    print(f"Number of parameters: {num_param}")
+    if params.load_gan:
+        num_param_gen = sum([p.numel() for p in model.generator.parameters()])
+        print(f"Number of parameters in generator: {num_param_gen}")
+        num_param_disc = sum([p.numel() for p in model.discriminator.parameters()])
+        print(f"Number of parameters in discriminator: {num_param_disc}")
+    else:
+        num_param = sum([p.numel() for p in model.parameters()])
+        print(f"Number of parameters: {num_param}")
 
     if not params.use_averaged_model:
         if params.avg == 1:
@@ -131,6 +172,10 @@ def main():
                 device=device,
             )
         )
+    
+    if params.load_gan:
+        print("Saving only the generator part of the GAN model.")
+        model = model.generator
     
     torch.save({"model": model.state_dict()}, params.saved_model_path)
     print(f"Saved to {params.saved_model_path}")

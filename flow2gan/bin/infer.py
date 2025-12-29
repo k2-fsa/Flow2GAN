@@ -19,21 +19,22 @@ import argparse
 import logging
 import os
 
-from lhotse import RecordingSet
 import soundfile as sf
 import torch
 import torch.nn as nn
+from lhotse import RecordingSet
+from huggingface_hub import hf_hub_download
 
-from checkpoint import (
+from flow2gan.bin.pretrain import get_cond_module_and_generator
+from flow2gan.checkpoint import (
     average_checkpoints,
     average_checkpoints_with_averaged_model,
     load_checkpoint,
 )
-from config import get_gan_config
-from dataset import build_data_loader
-from gan import GAN
-from pretrain import get_cond_module_and_generator
-from utils import AttributeDict, setup_logger, str2bool
+from flow2gan.dataset import build_data_loader
+from flow2gan.models.config import HF_MODEL_NAMES, HF_REPO, get_gan_config
+from flow2gan.models.gan import GAN
+from flow2gan.utils import AttributeDict, setup_logger, str2bool
 
 
 def get_parser():
@@ -77,10 +78,32 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--infer-gan",
+        "--checkpoint",
+        type=str,
+        default=None,
+        help="Local path to the checkpoint to load. ",
+    )
+
+    parser.add_argument(
+        "--hf-model-name",
+        type=str,
+        default=None,
+        help="""Name of the model file in HF hub. Supported names are 
+        `libritts-mel-1-step`, `libritts-mel-2-step`, `libritts-mel-4-step`.""",
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Directory to save output wavs.",
+    )
+
+    parser.add_argument(
+        "--load-gan",
         type=str2bool,
         default=True,
-        help="If true, infer with GAN model; If false, infer with the Flow Matching pretrained model.",
+        help="If true, load the GAN model; If false, load the generator model.",
     )
 
     parser.add_argument(
@@ -142,7 +165,7 @@ def get_cond_module_and_model(params: AttributeDict) -> nn.Module:
     # would add sampling_rate to params
     cond_module, generator = get_cond_module_and_generator(params) 
 
-    if not params.infer_gan:
+    if not params.load_gan:
         return cond_module, generator
 
     gan_cfg = get_gan_config(params.gan_name)
@@ -184,7 +207,7 @@ def infer_audio(
 
             for i in range(batch_size):
                 pred = pred_audio[i, :audio_lens[i].item()].data.cpu().numpy()
-                pred_out_file = f"{params.wav_dir_pred}/{file_names[i]}"
+                pred_out_file = f"{params.output_dir}/{file_names[i]}"
                 makedir_if_necessary(pred_out_file)
                 sf.write(pred_out_file, pred, params.sampling_rate)
 
@@ -209,7 +232,7 @@ def main():
     cond_module, model = get_cond_module_and_model(params)
     logging.info(model)
     
-    if params.infer_gan:
+    if params.load_gan:
         num_param_gen = sum([p.numel() for p in model.generator.parameters()])
         logging.info(f"Number of parameters in generator: {num_param_gen}")
         num_param_disc = sum([p.numel() for p in model.discriminator.parameters()])
@@ -218,52 +241,68 @@ def main():
         num_param = sum([p.numel() for p in model.parameters()])
         logging.info(f"Number of parameters: {num_param}")
 
-    params.suffix = f"wav-epoch-{params.epoch}-avg-{params.avg}"
-    if params.use_averaged_model:
-        params.suffix += "-use-avg-model"
-
-    params.wav_dir_pred = f"{params.exp_dir}/{params.suffix}-pred-step-{params.n_timesteps}"
-    os.makedirs(params.wav_dir_pred, exist_ok=True)
-
-    logging.info(params)
-
     device = torch.device("cpu")
     if torch.cuda.is_available():
         device = torch.device("cuda", 0)
     logging.info(f"Device: {device}")
 
-    if not params.use_averaged_model:
-        if params.avg == 1:
-            load_checkpoint(f"{params.exp_dir}/epoch-{params.epoch}.pt", model)
-        else:
-            start = params.epoch - params.avg + 1
-            filenames = []
-            for i in range(start, params.epoch + 1):
-                if i >= 1:
-                    filenames.append(f"{params.exp_dir}/epoch-{i}.pt")
-            logging.info(f"averaging {filenames}")
-            model.to(device)
-            model.load_state_dict(average_checkpoints(filenames, device=device))
-    else:
-        assert params.avg > 0, params.avg
-        start = params.epoch - params.avg
-        assert start >= 1, start
-        filename_start = f"{params.exp_dir}/epoch-{start}.pt"
-        filename_end = f"{params.exp_dir}/epoch-{params.epoch}.pt"
-        logging.info(
-            f"Calculating the averaged model over epoch range from "
-            f"{start} (excluded) to {params.epoch}"
-        )
-        model.to(device)
-        model.load_state_dict(
-            average_checkpoints_with_averaged_model(
-                filename_start=filename_start,
-                filename_end=filename_end,
-                device=device,
-            )
-        )
+    if params.checkpoint is not None or params.hf_model_name is not None:
+        assert not params.load_gan and params.output_dir is not None
 
-    if params.infer_gan:
+        if params.checkpoint is not None:
+            logging.info(f"Using local checkpoint: {params.checkpoint}")
+            checkpoint = params.checkpoint
+        else:
+            logging.info("Using checkpoint from HF hub")
+            assert params.hf_model_name in HF_MODEL_NAMES and params.n_timesteps == HF_MODEL_NAMES[params.hf_model_name] 
+            checkpoint = hf_hub_download(HF_REPO, filename=params.hf_model_name + ".pt")
+
+        load_checkpoint(checkpoint, model)
+    else:
+        params.suffix = f"wav-epoch-{params.epoch}-avg-{params.avg}"
+        if params.use_averaged_model:
+            params.suffix += "-use-avg-model"
+        params.output_dir = f"{params.exp_dir}/{params.suffix}-pred-step-{params.n_timesteps}"
+
+        logging.info(f"Using checkpoints epoch-*.pt in experiment dir {params.exp_dir}")
+
+        if not params.use_averaged_model:
+            if params.avg == 1:
+                load_checkpoint(f"{params.exp_dir}/epoch-{params.epoch}.pt", model)
+            else:
+                start = params.epoch - params.avg + 1
+                filenames = []
+                for i in range(start, params.epoch + 1):
+                    if i >= 1:
+                        filenames.append(f"{params.exp_dir}/epoch-{i}.pt")
+                logging.info(f"averaging {filenames}")
+                model.to(device)
+                model.load_state_dict(average_checkpoints(filenames, device=device))
+        else:
+            assert params.avg > 0, params.avg
+            start = params.epoch - params.avg
+            assert start >= 1, start
+            filename_start = f"{params.exp_dir}/epoch-{start}.pt"
+            filename_end = f"{params.exp_dir}/epoch-{params.epoch}.pt"
+            logging.info(
+                f"Calculating the averaged model over epoch range from "
+                f"{start} (excluded) to {params.epoch}"
+            )
+            model.to(device)
+            model.load_state_dict(
+                average_checkpoints_with_averaged_model(
+                    filename_start=filename_start,
+                    filename_end=filename_end,
+                    device=device,
+                )
+            )
+    
+    logging.info(params)
+
+    logging.info(f"Saving output wavs to {params.output_dir}")
+    os.makedirs(params.output_dir, exist_ok=True)
+
+    if params.load_gan:
         model = model.generator
 
     model.to(device)
