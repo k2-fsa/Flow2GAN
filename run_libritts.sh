@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright    2025  Xiaomi Corp.             (authors: Daniel Povey, Zengwei Yao)
+# Copyright    2025  Xiaomi Corp.             (authors: Zengwei Yao)
 #
 # See ../../../../LICENSE for clarification regarding multiple authors
 #
@@ -14,6 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# This script runs the full pipeline of Flow2GAN on LibriTTS dataset to reproduce the results in the paper:
+# "Flow2GAN: Hybrid Flow Matching and GAN with Multi-Resolution Network for Few-step High-Fidelity Audio Generation"
+# ()
+# You can extend it to your own dataset with necessary modifications.
 
 set -euo pipefail
 
@@ -36,7 +41,7 @@ set -euo pipefail
 stage=0
 stop_stage=0
 
-root_dir=/star-data/zengwei/libritts/LibriTTS/  # Modify this path to your LibriTTS root directory
+root_dir=download/libritts/LibriTTS/  # Modify this path to your LibriTTS root directory
 manifests=data/manifests/libritts
 train_recordings=$manifests/recordings_train-all-shuf.jsonl.gz
 valid_recordings=$manifests/recordings_valid.jsonl.gz
@@ -51,7 +56,7 @@ model_name=mel_24k_base
 pt_exp_dir=./output/exp-pretrain
 pt_epoch=200  
 pt_avg=40
-pt_batch_size=256
+pt_batch_size=256  # Could adjust based on your GPU memory
 pt_num_gpus=2
 # Finetune settings
 # Could set step to 1,2,4, would construct a GAN generator 
@@ -61,7 +66,7 @@ generator_path=$pt_exp_dir/epoch-${pt_epoch}-avg-${pt_avg}-use-avg-model.pt
 ft_exp_dir=./output/exp-finetune-step-${step}
 ft_epoch=20  
 ft_avg=4
-ft_batch_size=64
+ft_batch_size=64  # Could adjust based on your GPU memory
 ft_num_gpus=1
 pred_wav_dir=$ft_exp_dir/wav-epoch-${ft_epoch}-avg-${ft_avg}-use-avg-model-pred-step-${step} 
 

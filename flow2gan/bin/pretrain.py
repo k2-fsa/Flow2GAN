@@ -1,4 +1,3 @@
-# Adapted from https://github.com/k2-fsa/icefall/blob/master/egs/librispeech/ASR/zipformer/train.py
 #!/usr/bin/env python3
 # Copyright         2025  Xiaomi Corp.        (authors: Zengwei Yao)
 #
@@ -15,6 +14,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Adapted from https://github.com/k2-fsa/icefall/blob/master/egs/librispeech/ASR/zipformer/train.py
 
 
 import argparse
@@ -255,7 +256,7 @@ def get_parser():
         type=str,
         default="mel_24k_base",
         help="""Name of the model to use. Supported names are 
-        `mel_24k_base`, `mel_24k_small`.""",
+        `mel_24k_base`.""",
     )
 
     return parser
