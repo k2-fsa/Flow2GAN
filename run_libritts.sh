@@ -29,7 +29,7 @@ set -euo pipefail
 # 
 # After data preparation in stage -1, could either
 # a) set stage=0 and stop_stage=0 to directly inference with the HuggingFace model,
-#    then jump to stage 5 to compute objective metrics on the inference results; 
+#    then jump to stage 5 to compute objective metrics; 
 # or
 # b) set stage=1 and stop_stage=6 to run the full pipeline.
 
@@ -211,6 +211,9 @@ fi
 
 # Compute objective metrics
 if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
+  # Should first install packages in requirements_eval.txt
+  # For ViSQOL, please follow instructions at https://github.com/google/visqol
+  echo "Compute objective metrics"
   for f in $valid_filelist $test_filelist; do
       # Should first download a Wav2Vec2 model from https://huggingface.co/facebook/wav2vec2-base 
       # and save to download/wav2vec2_base
@@ -226,7 +229,7 @@ if [ $stage -le 5 ] && [ $stop_stage -ge 5 ]; then
         --gt-wav-dir $root_dir \
         --pred-wav-dir $pred_wav_dir \
         --wav-list-file $f \
-        --use-visqol False \
+        --use-visqol True \
         --n-proc 20
       
       echo "Compute V/UV F1 and Periodicity on $f"
@@ -248,18 +251,3 @@ if [ $stage -le 6 ] && [ $stop_stage -ge 6 ]; then
     --load-gan True \
     --model-name $model_name 
 fi
-
-
-# # Inference
-# if [ $stage -eq 7 ]; then
-#   # Inference with the GAN finetuned model
-#   # The inferred wavs would be saved to $ft_exp_dir/wav-epoch-20-avg-4-use-avg-model-pred-step-${step}
-#   export CUDA_VISIBLE_DEVICES=4
-#   python -m flow2gan.bin.infer_dir \
-#     --model-name $model_name \
-#     --n-timesteps 1 \
-#     --input-type audio \
-#     --input-dir ./test_wavs \
-#     --output-dir ./test_wavs_out 
-# fi
-    # --checkpoint ./output/exp-finetune-step-2/epoch-20-avg-4-use-avg-model-only-gen.pt \

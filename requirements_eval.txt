@@ -1,0 +1,14 @@
+auraloss
+einops
+huggingface_hub
+librosa
+lhotse
+numpy
+pesq
+scipy
+soundfile
+torch
+torchaudio
+torchcrepe
+tqdm
+transformers

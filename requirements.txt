@@ -1,0 +1,8 @@
+einops
+huggingface_hub
+librosa
+lhotse
+numpy
+soundfile
+torch
+torchaudio
