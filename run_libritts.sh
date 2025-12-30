@@ -17,7 +17,7 @@
 
 # This script runs the full pipeline of Flow2GAN on LibriTTS dataset to reproduce the results in the paper:
 # "Flow2GAN: Hybrid Flow Matching and GAN with Multi-Resolution Network for Few-step High-Fidelity Audio Generation"
-# ()
+# (https://arxiv.org/abs/2512.23278)
 # You can extend it to your own dataset with necessary modifications.
 
 set -euo pipefail

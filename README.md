@@ -1,7 +1,7 @@
 
-# Flow2GAN [![arXiv](https://img.shields.io/badge/arXiv-Paper-COLOR.svg)](https://arxiv.org/pdf/*.pdf) [![demo page](https://img.shields.io/badge/GitHub.io-Demo_Page-blue?logo=Github&style=flat-square)](https://flow2gan.github.io) [![hf](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-yellow)](https://huggingface.co/k2-fsa/Flow2GAN)
+# Flow2GAN [![arXiv](https://img.shields.io/badge/arXiv-Paper-COLOR.svg)](https://arxiv.org/abs/2512.23278) [![demo page](https://img.shields.io/badge/GitHub.io-Demo_Page-blue?logo=Github&style=flat-square)](https://flow2gan.github.io) [![hf](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-yellow)](https://huggingface.co/k2-fsa/Flow2GAN)
 
-This repo is the official implementation of ["Flow2GAN: Hybrid Flow Matching and GAN with Multi-Resolution Network for Few-step High-Fidelity Audio Generation"](https://arxiv.org/pdf/*.pdf). Flow2GAN enables high-fidelity audio generation from Mel-spectrograms or discrete audio tokens with efficient few-step (even one-step) inference.
+This repo is the official implementation of ["Flow2GAN: Hybrid Flow Matching and GAN with Multi-Resolution Network for Few-step High-Fidelity Audio Generation"](https://arxiv.org/abs/2512.23278). Flow2GAN enables high-fidelity audio generation from Mel-spectrograms or discrete audio tokens with efficient few-step (even one-step) inference.
 
 ## Overreview
 
@@ -58,6 +58,13 @@ export PYTHONPATH=$PWD:$PYTHONPATH
 ```
 
 ## Usage
+
+The following examples will automatically download the required pretrained models from HuggingFace Hub. 
+If you have trobles accessing HuggingFace, you can consider setting up the HF mirror endpoint:
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+```
 
 ### Inference from wav file (reconstruction)
 
@@ -190,4 +197,10 @@ You can also scan the QR code to join our wechat group or follow our wechat offi
 ## Citation
 
 ```bibtex
+@article{yao2025flow2gan,
+  title={Flow2GAN: Hybrid Flow Matching and GAN with Multi-Resolution Network for Few-step High-Fidelity Audio Generation},
+  author={Zengwei Yao, Wei Kang, Han Zhu, Liyong Guo, Lingxuan Ye, Fangjun Kuang, Weiji Zhuang, Zhaoqing Li, Zhifeng Han, Long Lin, Daniel Povey},
+  journal={arXiv preprint arXiv:2512.23278},
+  year={2025}
+}
 ```
