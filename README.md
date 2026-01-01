@@ -28,6 +28,9 @@ Experimental results indicate that our **Flow2GAN delivers high-fidelity audio g
 **2025/12/30**: **Flow2GAN with Mel-spectrogram conditioning** is released, with checkpoints available at
 [![hf](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-yellow)](https://huggingface.co/k2-fsa/Flow2GAN)
 
+**2025/12/31**: Chinese WeChat blog post about Flow2GAN: [BigVGAN 平替：高保真声码器 Flow2GAN
+](https://mp.weixin.qq.com/s/-AxK52LHASXSq1ihMHSa0Q)
+
 ## Installation
 
 ### 1. Clone the repository
