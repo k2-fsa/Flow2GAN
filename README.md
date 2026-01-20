@@ -15,13 +15,22 @@ Experimental results indicate that our **Flow2GAN delivers high-fidelity audio g
 
 ![Framework](assets/framework.png)
 
-### Results comparison on LibriTTS test-set
+### Mel-conditioned results comparison on LibriTTS test-set
 
 ![Results_libritts](assets/result_libritts.png)
 
 ### Speed comparison (batch size = 16, length = 1s)
 
 ![Speed](assets/speed.png)
+
+### Mel-conditioned results comparison on [24kHz universal audio test-set](https://drive.google.com/file/d/1WjRRfD1yJSjEA3xfC8-635ugpLvnRK0f/view) from [RFWave repo](https://github.com/bfs18/rfwave) 
+
+| Model | PESQ ↑ | ViSQOL ↑ |
+|-------|--------|----------|
+| [BigVGAN-v2](https://huggingface.co/nvidia/bigvgan_v2_24khz_100band_256x) | 3.945 | 4.935 |
+| Flow2GAN, 1-step | 3.925 | 4.918 |
+| Flow2GAN, 2-step | 4.121 | 4.949 |
+| Flow2GAN, 4-step | **4.203** | **4.958** |
 
 ## News
 
@@ -30,6 +39,8 @@ Experimental results indicate that our **Flow2GAN delivers high-fidelity audio g
 
 **2025/12/31**: Chinese WeChat blog post about Flow2GAN: [BigVGAN 平替：高保真声码器 Flow2GAN
 ](https://mp.weixin.qq.com/s/-AxK52LHASXSq1ihMHSa0Q)
+
+**2026/01/20**: **Mel-spectrogram conditioned model checkpoints trained on a large-scale 24kHz universal audio dataset** are now available at [![hf](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-yellow)](https://huggingface.co/k2-fsa/Flow2GAN)
 
 ## Installation
 
@@ -82,6 +93,7 @@ from flow2gan.models.modules import LogMelSpectrogram
 step = 4  # Could set step to 1,2,4
 model_name = "mel_24k_base"
 hf_model_name = f"libritts-mel-{step}-step"
+# hf_model_name = f"universal-24k-mel-{step}-step"  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 model, model_cfg = get_model(model_name=model_name, hf_model_name=hf_model_name)
@@ -129,6 +141,7 @@ from flow2gan import get_model
 step = 4  # Could set step to 1,2,4
 model_name = "mel_24k_base"
 hf_model_name = f"libritts-mel-{step}-step"
+# hf_model_name = f"universal-24k-mel-{step}-step"  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 model, model_cfg = get_model(model_name=model_name, hf_model_name=hf_model_name)
@@ -158,6 +171,7 @@ print(f"Wrote output to {output_path}")
 step=4  # Could be 1,2,4
 model_name=mel_24k_base
 hf_model_name=libritts-mel-${step}-step
+# hf_model_name=universal-24k-mel-${step}-step  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 

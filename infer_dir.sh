@@ -6,6 +6,7 @@ set -euo pipefail
 step=4  # Could be 1,2,4
 model_name=mel_24k_base
 hf_model_name=libritts-mel-${step}-step
+# hf_model_name=universal-24k-mel-${step}-step  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 
