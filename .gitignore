@@ -33,3 +33,8 @@ dist/
 
 # Mac/OS
 .DS_Store
+
+# Other
+output/
+outputs/
+

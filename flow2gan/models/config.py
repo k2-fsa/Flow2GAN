@@ -84,5 +84,8 @@ HF_REPO = "k2-fsa/Flow2GAN"
 HF_MODEL_NAMES = {
     "libritts-mel-1-step": 1,
     "libritts-mel-2-step": 2,
-    "libritts-mel-4-step": 4,    
+    "libritts-mel-4-step": 4,
+    "universal-24k-mel-1-step": 1,
+    "universal-24k-mel-2-step": 2,
+    "universal-24k-mel-4-step": 4,
 }

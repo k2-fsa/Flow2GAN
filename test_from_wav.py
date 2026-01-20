@@ -28,6 +28,7 @@ from flow2gan.models.modules import LogMelSpectrogram
 step = 4  # Could set step to 1,2,4
 model_name = "mel_24k_base"
 hf_model_name = f"libritts-mel-{step}-step"
+# hf_model_name = f"universal-24k-mel-{step}-step"  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 model, model_cfg = get_model(model_name=model_name, hf_model_name=hf_model_name)
