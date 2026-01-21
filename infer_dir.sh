@@ -4,9 +4,15 @@
 set -euo pipefail
 
 step=4  # Could be 1,2,4
+
+# 24kHz model
 model_name=mel_24k_base
 hf_model_name=libritts-mel-${step}-step
 # hf_model_name=universal-24k-mel-${step}-step  # For universal audio model
+
+# 44kHz model
+# model_name=mel_44k_128band_512x_base
+# hf_model_name=universal-44k-mel-128band-512x-${step}-step  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 
