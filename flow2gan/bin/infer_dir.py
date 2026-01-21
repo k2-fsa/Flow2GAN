@@ -214,8 +214,10 @@ def main():
         output_path = os.path.join(params.output_dir, filename.replace(".pt", ".wav"))
 
         if params.input_type == "audio":
-            audio, sr = torchaudio.load(input_path)  # (1, time)
+            audio, sr = torchaudio.load(input_path)  
             assert sr == params.sampling_rate
+            if audio.size(0) > 1:
+                audio = torch.mean(audio, dim=0, keepdim=True)  # to mono
             mel_spec = None
         elif params.input_type == "mel":
             mel_spec = torch.load(input_path)  # (1, n_mels, frames)

@@ -40,7 +40,7 @@ Experimental results indicate that our **Flow2GAN delivers high-fidelity audio g
 **2025/12/31**: Chinese WeChat blog post about Flow2GAN: [BigVGAN 平替：高保真声码器 Flow2GAN
 ](https://mp.weixin.qq.com/s/-AxK52LHASXSq1ihMHSa0Q)
 
-**2026/01/20**: **Mel-spectrogram conditioned model checkpoints trained on a large-scale 24kHz universal audio dataset** are now available at [![hf](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-yellow)](https://huggingface.co/k2-fsa/Flow2GAN)
+**2026/01/20**: **Mel-spectrogram conditioned model checkpoints trained on a large-scale universal audio dataset (24kHz, 44kHz)** are now available at [![hf](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-yellow)](https://huggingface.co/k2-fsa/Flow2GAN)
 
 ## Installation
 
@@ -91,9 +91,14 @@ from flow2gan import get_model
 from flow2gan.models.modules import LogMelSpectrogram
 
 step = 4  # Could set step to 1,2,4
+# 24kHz model
 model_name = "mel_24k_base"
 hf_model_name = f"libritts-mel-{step}-step"
 # hf_model_name = f"universal-24k-mel-{step}-step"  # For universal audio model
+
+# 44kHz model
+# model_name = "mel_44k_128band_512x_base"
+# hf_model_name = f"universal-44k-mel-128band-512x-{step}-step"  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 model, model_cfg = get_model(model_name=model_name, hf_model_name=hf_model_name)
@@ -117,10 +122,14 @@ cond_module.to(device)
 cond_module.eval()
 
 input_path = "./test_data/wav/1089_134686_000002_000000.wav"
+# input_path = "./test_data/wav_44k/mixture.wav"
 output_path = "output.wav"
-audio, sr = torchaudio.load(input_path)  # (1, time)
+audio, sr = torchaudio.load(input_path)  
 assert sr == model_cfg.sampling_rate
 audio = audio.to(device)  
+if audio.shape[0] > 1:
+    audio = torch.mean(audio, dim=0, keepdim=True)  # to mono
+# audio: (1, samples)
 
 with torch.inference_mode():
     mel_spec = cond_module(audio)  # (1, n_mels, frames)
@@ -139,9 +148,15 @@ import torch
 from flow2gan import get_model
 
 step = 4  # Could set step to 1,2,4
+
+# 24kHz model
 model_name = "mel_24k_base"
 hf_model_name = f"libritts-mel-{step}-step"
 # hf_model_name = f"universal-24k-mel-{step}-step"  # For universal audio model
+
+# 44kHz model
+# model_name = "mel_44k_128band_512x_base"
+# hf_model_name = f"universal-44k-mel-128band-512x-{step}-step"  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 model, model_cfg = get_model(model_name=model_name, hf_model_name=hf_model_name)
@@ -154,6 +169,7 @@ model.to(device)
 model.eval()
 
 input_path = "./test_data/mel/1089_134686_000002_000000.pt"
+# input_path = "./test_data/mel_44k_128band_512x/mixture.pt"
 output_path = "output.wav"
 mel_spec = torch.load(input_path)  # (1, n_mels, frames)
 mel_spec = mel_spec.to(device)  
@@ -169,9 +185,15 @@ print(f"Wrote output to {output_path}")
 
 ```bash
 step=4  # Could be 1,2,4
+
+# 24kHz model
 model_name=mel_24k_base
 hf_model_name=libritts-mel-${step}-step
 # hf_model_name=universal-24k-mel-${step}-step  # For universal audio model
+
+# 44kHz model
+# model_name=mel_44k_128band_512x_base
+# hf_model_name=universal-44k-mel-128band-512x-${step}-step  # For universal audio model
 
 # Required model will be downloaded from HuggingFace Hub automatically
 

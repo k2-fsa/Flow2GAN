@@ -22,6 +22,8 @@ from flow2gan.utils import AttributeDict
 def get_generator_config(model_named: str = "mel_24k_base") -> AttributeDict:
     if model_named == "mel_24k_base":
         return AttributeDict(mel_24k_base)
+    elif model_named == "mel_44k_128band_512x_base":
+        return AttributeDict(mel_44k_128band_512x_base)
     else:
         raise ValueError(f"Unsupported model name: {model_named}")
 
@@ -59,6 +61,39 @@ mel_24k_base = {
     "max_add_noise_scale": 0.0,  
 }
 
+mel_44k_128band_512x_base = {
+    "sampling_rate": 44100,
+    "n_mels": 128,
+    "mel_n_fft": 2048,
+    "mel_hop_length": 512,
+    "n_ffts": (1024, 512, 256),
+    "hop_lengths": (512, 256, 128),
+    "channels": (768, 512, 384),
+    "time_embed_channels": 512,
+    "hidden_factor": 3,
+    "conv_kernel_sizes": (7, 7, 7),
+    "num_layers": (8, 8, 8),
+    "use_cond_encoder": True,
+    "cond_enc_channels": 512,
+    "cond_enc_hidden_factor": 3,
+    "cond_enc_conv_kernel_size": 7,
+    "cond_enc_num_layers": 4,
+    "residual_scale": 1.0,
+    "init_noise_scale": 0.1,
+    "pred_x1": True,
+    "branch_reduction": "mean",
+    "spec_scaling_loss": True,
+    "loss_n_filters": 256,
+    "loss_n_fft": 2048,
+    "loss_hop_length": 512,
+    "loss_power": 0.5,
+    "loss_eps": 1e-7,
+    "loss_scale_min": 1e-2,
+    "loss_scale_max": 1e+2,
+    "branch_dropout": 0.05,
+    "max_add_noise_scale": 0.0,  
+}
+
 
 def get_gan_config(model_name: str) -> AttributeDict:
     if model_name == "gan_multi_scale_mel_recon":
@@ -76,7 +111,7 @@ gan_multi_scale_mel_recon = {
 
 gan_single_scale_mel_recon = {
     "mel_recon_n_ffts": (1024,),
-    "mel_recon_n_mels": (100),
+    "mel_recon_n_mels": (100,),
 }
 
 
@@ -88,4 +123,7 @@ HF_MODEL_NAMES = {
     "universal-24k-mel-1-step": 1,
     "universal-24k-mel-2-step": 2,
     "universal-24k-mel-4-step": 4,
+    "universal-44k-mel-128band-512x-1-step": 1,
+    "universal-44k-mel-128band-512x-2-step": 2,
+    "universal-44k-mel-128band-512x-4-step": 4,
 }
